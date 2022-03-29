@@ -112,12 +112,27 @@ void CircularArray<T>::insert(T data, int pos){
 
 template <class T>
 T CircularArray<T>::pop_front(){
-    return this->array[0];
+    if(!this->is_empty()){
+        T ret = this->array[0];
+        for(int i = this->front; i < this->back; i++){
+            this->array[i] = this->array[i+1];
+        }
+        this->back = this->back - 1;
+        return ret;
+    } else{
+        return this->array[0];
+    }
 }
 
 template <class T>
 T CircularArray<T>::pop_back(){
-    return this->array[0];
+    if(!this->is_empty()){
+        T ret = this->array[this->back];        
+        this->back = this->back - 1;
+        return ret;
+    } else{
+        return this->array[0];
+    }
 }
 
 template <class T>
