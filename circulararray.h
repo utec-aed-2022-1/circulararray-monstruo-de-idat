@@ -95,7 +95,14 @@ void CircularArray<T>::push_front(T data){
 
 template <class T>
 void CircularArray<T>::push_back(T data){
-
+    if(!this->is_empty()){
+        this->array[this->back+1] = data;
+        this->back = this->back + 1;
+    } else{
+        this->array[0] = data;
+        this->front = 0;
+        this->back = 0;
+    }
 }
 
 template <class T>
