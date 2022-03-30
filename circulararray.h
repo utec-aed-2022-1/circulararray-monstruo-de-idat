@@ -73,8 +73,8 @@ string CircularArray<T>::to_string(string sep)
 {
     string result = ""; 
     for (int i = 0; i < size(); i++)
-        result += std::to_string((*this)[i]) + sep;
-    return result;    
+        result += std::to_string(this->array[i]) + sep;
+    return result;
 }
 
 ////////////////
@@ -107,7 +107,7 @@ void CircularArray<T>::push_back(T data){
 
 template <class T>
 void CircularArray<T>::insert(T data, int pos){
-    
+    this->array[pos] = this->array(data);
 }
 
 template <class T>
@@ -147,12 +147,12 @@ bool CircularArray<T>::is_empty(){
 
 template <class T>
 int CircularArray<T>::size(){
-    return -1;
+    return (this->back - this->front) + 1;
 }
 
 template <class T>
 void CircularArray<T>::clear(){
-    
+    this->back = this->front = -1;
 }
 
 template <class T>
@@ -161,17 +161,52 @@ T &CircularArray<T>::operator[](int){
 }
 
 template <class T>
-void CircularArray<T>::sort(){
-
+void CircularArray<T>::sort(){    
+    if(!this->is_empty()){
+        bool isSorted = false;
+        T temp;
+        while(!isSorted){
+            isSorted = true;
+            for(int i = this->front; i < this->back; i++){
+                if(this->array[i+1]<this->array[i]){
+                    temp = this->array[i+1];
+                    this->array[i+1] = this->array[i];
+                    this->array[i] = temp;
+                    isSorted = false;
+                }
+            }
+        }
+    }
 }
 
 template <class T>
 bool CircularArray<T>::is_sorted(){
+    if(!this->is_empty()){     
+        T minValue = this->array[this->front];
+        for(int i = this->front+1; i < this->back; i++){
+            if(this->array[i] < minValue){
+                return false;
+            } else{
+                minValue = this->array[i];
+            }
+        }
+        return true;
+    }
     return false;
 }
 
 
 template <class T>
 void CircularArray<T>::reverse(){
-
+    if(!this->is_empty()){
+        T tempArray[this->size()];
+        int tempIdx = 0;
+        for(int i = this->back+1; i > this->front; i--){
+            tempArray[tempIdx] = this->array[i-1];
+            tempIdx++;
+        }
+        for(int i = this->front; i <= this->back; i++){
+            this->array[i] = tempArray[i];
+        }
+    }
 }
