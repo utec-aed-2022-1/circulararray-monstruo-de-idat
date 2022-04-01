@@ -4,7 +4,7 @@ using namespace std;
 template <class T>
 class CircularArray
 {
-private:
+protected:
     T *array;
     int capacity;
     int back, front;
@@ -71,9 +71,13 @@ int CircularArray<T>::next(int index)
 template <class T>
 string CircularArray<T>::to_string(string sep)
 {
-    string result = ""; 
-    for (int i = 0; i < size(); i++)
-        result += std::to_string(this->array[i]) + sep;
+    string result = "";
+    int idx = this->front;
+    for (int i = 0; i < size(); i++){
+        result += std::to_string(this->array[idx]) + sep;
+        idx = this->next(idx);
+    }
+        
     return result;
 }
 
@@ -81,73 +85,102 @@ string CircularArray<T>::to_string(string sep)
 template <class T>
 void CircularArray<T>::push_front(T data){
     if(!this->is_empty()){
-        for(int i = this->back+1; i > this->front; i--){
-            this->array[i] = this->array[i-1];
-        }
-        this->array[0] = data;
-        this->back = this->back + 1;
+        this->front = this->prev(this->front);
+        this->array[this->front] = data;
     } else{
         this->array[0] = data;
-        this->front = 0;
-        this->back = 0;
+        this->front = this->back = 0;
     }
+        
+    //     for(int i = this->back+1; i > this->size; i--){
+    //         this->array[i] = this->array[i-1];
+    //     }
+    //     this->array[0] = data;
+    //     this->back = this->back + 1;
+    // } else{
+    //     this->array[0] = data;
+    //     this->front = 0;
+    //     this->back = 0;
 }
 
 template <class T>
 void CircularArray<T>::push_back(T data){
     if(!this->is_empty()){
-        this->array[this->back+1] = data;
-        this->back = this->back + 1;
+        this->back = this->next(this->back);
+        this->array[this->back] = data;
     } else{
         this->array[0] = data;
-        this->front = 0;
-        this->back = 0;
+        this->front = this->back = 0;
     }
+
+    // if(!this->is_empty()){
+    //     this->array[this->back+1] = data;
+    //     this->back = this->back + 1;
+    // } else{
+    //     this->array[0] = data;
+    //     this->front = 0;
+    //     this->back = 0;
+    // }
 }
 
 template <class T>
 void CircularArray<T>::insert(T data, int pos){
-    this->array[pos] = this->array(data);
+    if(pos < this->size() && !this->is_empty()){
+        int idx = this->front;
+        for(int i = 0; i < pos; i++){
+            idx = this->next(idx);
+        }
+        this->array[idx] = data;
+    }
+    // else -> Esto debería dar error.
 }
 
 template <class T>
 T CircularArray<T>::pop_front(){
     if(!this->is_empty()){
-        T ret = this->array[0];
-        for(int i = this->front; i < this->back; i++){
-            this->array[i] = this->array[i+1];
+        T poppedValue = this->array[this->front];
+        if(this->front == this->back){
+            this->front = this->back = -1;
+        } else{
+            this->front = this->next(this->front);
         }
-        this->back = this->back - 1;
-        return ret;
+        return poppedValue;
     } else{
-        return this->array[0];
+        return this->array[0]; // Esto debería dar error.
     }
 }
 
 template <class T>
 T CircularArray<T>::pop_back(){
     if(!this->is_empty()){
-        T ret = this->array[this->back];        
-        this->back = this->back - 1;
-        return ret;
+        T poppedValue = this->array[this->back];
+        if(this->front == this->back){
+            this->front = this->back = -1;
+        } else{
+            this->back = this->prev(this->back);
+        }
+        return poppedValue;
     } else{
-        return this->array[0];
+        return this->array[0]; // Esto debería dar error.
     }
 }
 
 template <class T>
 bool CircularArray<T>::is_full(){
-    return ((this->back + 1) % this->capacity == this->front);
+    return ((this->back + 1) == this->front);
 }
 
 template <class T>
 bool CircularArray<T>::is_empty(){
-    return (this->front == -1 && this->back == - 1);
+    return (this->front == -1 && this->back == -1);
 }
 
 template <class T>
 int CircularArray<T>::size(){
-    return (this->back - this->front) + 1;
+    int f, b;
+    f = this->front;
+    b = this->back;
+    return (f < b) ? b - f + 1 : capacity - f + b + 1 ;
 }
 
 template <class T>
@@ -156,8 +189,15 @@ void CircularArray<T>::clear(){
 }
 
 template <class T>
-T &CircularArray<T>::operator[](int){
-    return this->array[0];
+T &CircularArray<T>::operator[](int index){
+    if(index < this->size() && !this->is_empty()){
+        int idx = this->front;
+        for(int i = 0; i < index; i++){
+            idx = this->next(idx);
+        }
+        return this->array[idx];
+    }
+    return this->array[0]; // Esto debería dar error.
 }
 
 template <class T>
@@ -167,13 +207,15 @@ void CircularArray<T>::sort(){
         T temp;
         while(!isSorted){
             isSorted = true;
-            for(int i = this->front; i < this->back; i++){
-                if(this->array[i+1]<this->array[i]){
-                    temp = this->array[i+1];
-                    this->array[i+1] = this->array[i];
-                    this->array[i] = temp;
+            int idx = this->front;
+            for(int i = 0; i < this->size()-1; i++){
+                if(this->array[this->next(idx)]<this->array[idx]){
+                    temp = this->array[this->next(idx)];
+                    this->array[this->next(idx)] = this->array[idx];
+                    this->array[idx] = temp;
                     isSorted = false;
                 }
+                idx = this->next(idx);
             }
         }
     }
@@ -182,13 +224,12 @@ void CircularArray<T>::sort(){
 template <class T>
 bool CircularArray<T>::is_sorted(){
     if(!this->is_empty()){     
-        T minValue = this->array[this->front];
-        for(int i = this->front+1; i < this->back; i++){
-            if(this->array[i] < minValue){
+        int idx = this->front;
+        for(int i = 0; i < this->size()-1; i++){
+            if(this->array[idx] > this->array[this->next(idx)]){
                 return false;
-            } else{
-                minValue = this->array[i];
             }
+            idx = this->next(idx);
         }
         return true;
     }
@@ -200,13 +241,15 @@ template <class T>
 void CircularArray<T>::reverse(){
     if(!this->is_empty()){
         T tempArray[this->size()];
-        int tempIdx = 0;
-        for(int i = this->back+1; i > this->front; i--){
-            tempArray[tempIdx] = this->array[i-1];
-            tempIdx++;
+        int idx = this->back;
+        for(int i = 0; i < this->size(); i++){
+            tempArray[i] = this->array[idx];
+            idx = this->prev(idx);            
         }
-        for(int i = this->front; i <= this->back; i++){
-            this->array[i] = tempArray[i];
+        idx = this->front;
+        for(int i = 0; i < this->size(); i++){
+            this->array[idx] = tempArray[i];
+            idx = this->next(idx);
         }
     }
 }
