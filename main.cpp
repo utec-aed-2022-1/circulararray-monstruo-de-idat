@@ -6,7 +6,7 @@ using namespace std;
 
 int main() {
     CircularArray<int>* array = new CircularArray<int>(7);
-    ASSERT(array->is_empty() == true, "The function is_empty is not working");
+    ASSERT(array->is_empty() == true, "The function is_empty is not working");   
     array->push_back(6);
     array->push_back(3);
     array->push_back(7);
@@ -21,6 +21,8 @@ int main() {
     array->push_front(15);
     array->push_front(4);
     ASSERT(array->to_string() == "4 15 2 10 3 7 8 ", "The function push_front is not working");
+    ASSERT((*array)[1] == 15, "The operator [] is not working"); // Se agregaron 2 tests para corroborar el funcionamiento.
+    ASSERT((*array)[5] == 7, "The operator [] is not working");
     ASSERT(array->is_full() == true, "The function is_full is not working");
     ASSERT(array->is_sorted() == false, "The function is_sorted is not working");
     array->sort();
